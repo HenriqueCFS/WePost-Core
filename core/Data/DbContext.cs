@@ -1,20 +1,24 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using core.Data.Models;
-namespace core.Data
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
+
+public class ProjectContext : IdentityDbContext, IDataProtectionKeyContext
 {
-    public class ProjectContext : DbContext
+    public ProjectContext(DbContextOptions<ProjectContext> options)
+        : base(options)
     {
-        public ProjectContext(DbContextOptions<ProjectContext> options)
-            : base(options)
-        {
+        
+    }
 
-        }
+    public DbSet<User> Users { get; set; } = null!;
+    public DbSet<DataProtectionKey> DataProtectionKeys { get; set; } = null!;
 
-        public DbSet<User> Users { get; set; }
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<User>().ToTable("Users");
-        }
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        builder.Entity<User>()
+                .HasIndex(u => u.Email)
+                .IsUnique();
+        base.OnModelCreating(builder);
     }
 }

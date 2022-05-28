@@ -1,4 +1,4 @@
-﻿namespace core.Controllers.Errors.GraphQL
+﻿namespace core.Controllers
 {
     public class GraphQLErrorFilter : IErrorFilter
     {

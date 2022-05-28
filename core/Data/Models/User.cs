@@ -1,22 +1,15 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace core.Data.Models
+namespace core.Data.Models;
+public class User : IdentityUser
 {
-    [Table("Users")]
-    public class User
-    {
-        [GraphQLType(typeof(NonNullType<IdType>))]
-        [Key]
-        public int Id { get; set; }
-        [GraphQLNonNullType]
-        [Required]
-        public string Username { get; set; }
-        [GraphQLNonNullType]
-        [Required]
-        public string Password { get; set; }
-        [GraphQLNonNullType]
-        [Required]
-        public string Role { get; set; }
-    }
+    [Required]
+    public override string UserName { get; set; }
+    [Required]
+    public override string Email { get; set; }
+    [Required]
+    public string Role { get; set; }
 }
+

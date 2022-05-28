@@ -2,6 +2,7 @@
 using GraphQL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
+using core.Data.GraphQL;
 
 namespace core.Data.GraphQL
 {
@@ -13,8 +14,7 @@ namespace core.Data.GraphQL
         {
             var user = new User
             {
-                Username = input.Username,
-                Password = input.Password,
+                UserName = input.Username,
                 Role = input.Role
             };
 
@@ -28,15 +28,14 @@ namespace core.Data.GraphQL
             UpdateUserInput input,
             [Service] ProjectContext context)
         {
-            var selectedUser = context.Users?.Where(x => x.Id == input.Id).SingleOrDefault();
+            var selectedUser = context.Users?.Where(x => x.UserName == input.Username).FirstOrDefault();
             try
             {
                 if (selectedUser == null)
                 {
                     throw new Exception("User not found.");
                 }
-                selectedUser.Username = input.Username;
-                selectedUser.Password = input.Password;
+                selectedUser.UserName = input.Username;
                 selectedUser.Role = input.Role;
                 await context.SaveChangesAsync();
             }
