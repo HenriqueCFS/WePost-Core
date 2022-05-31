@@ -15,7 +15,6 @@ namespace core.Data.GraphQL
             var user = new User
             {
                 UserName = input.Username,
-                Role = input.Role
             };
 
             context.Users.Add(user);
@@ -36,7 +35,6 @@ namespace core.Data.GraphQL
                     throw new Exception("User not found.");
                 }
                 selectedUser.UserName = input.Username;
-                selectedUser.Role = input.Role;
                 await context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)

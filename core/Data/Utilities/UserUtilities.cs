@@ -21,7 +21,6 @@ public static class UserUtilities
     {
         if (email == null) return null;
         var user = await context.Users
-            .Include(u => u.Role)
             .FirstOrDefaultAsync(u => u.Email == email);
         return user ?? null;
     }

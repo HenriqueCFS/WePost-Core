@@ -12,8 +12,10 @@ using core.Data.Models;
 using core.Controllers;
 using core.Extensions;
 using core.Data.Roles;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 var connectionString = builder.Configuration.GetConnectionString("ProjectContext") ?? throw new InvalidOperationException("Connection string 'ProjectContext' not found.");
 builder.Services.AddDbContext<ProjectContext>(options =>
   options.UseNpgsql(connectionString)
@@ -31,6 +33,17 @@ builder.Services
     .AddMutationType<Mutation>();
 builder.Services.AddErrorFilter<GraphQLErrorFilter>();
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(MyAllowSpecificOrigins,
+                          policy =>
+                          {
+                              policy.WithOrigins("http://localhost:3000",
+                                                  "https://localhost:3000")
+                                                  .AllowAnyHeader()
+                                                  .AllowAnyMethod();
+                          });
+});
 builder.Services.AddIdentity<User, IdentityRole>(options =>
 {
     options.SignIn.RequireConfirmedAccount = true;
@@ -83,7 +96,6 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    app.UseDeveloperExceptionPage();
     app.UseMigrationsEndPoint();
 }
 
@@ -100,6 +112,8 @@ app.UseHttpsRedirection();
 app.MapControllers();
 
 app.UseRouting();
+
+app.UseCors(MyAllowSpecificOrigins);
 
 app.UseAuthentication();
 app.UseAuthorization();
