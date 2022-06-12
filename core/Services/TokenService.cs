@@ -16,7 +16,7 @@ public class TokenService : ITokenService
         _configuration = configuration;
     }
 
-    public string GenerateJsonWebToken(User user)
+    public string GenerateJsonWebToken(AppUser user)
     {
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Security:Jwt:Key"]));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
@@ -37,5 +37,5 @@ public class TokenService : ITokenService
 
 public interface ITokenService
 {
-    public string GenerateJsonWebToken(User user);
+    public string GenerateJsonWebToken(AppUser user);
 }

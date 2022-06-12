@@ -13,6 +13,9 @@ using core.Controllers;
 using core.Extensions;
 using core.Data.Roles;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using core.Hubs;
+using Microsoft.AspNetCore.Builder;
+using core.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
@@ -24,6 +27,7 @@ var key = Encoding.UTF8.GetBytes(builder.Configuration["Security:Jwt:Secret"]);
 var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Security:JWT:Secret"]));
 
 builder.Services.AddControllers();
+builder.Services.AddSignalR();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services
@@ -38,13 +42,15 @@ builder.Services.AddCors(options =>
     options.AddPolicy(MyAllowSpecificOrigins,
                           policy =>
                           {
-                              policy.WithOrigins("http://localhost:3000",
-                                                  "https://localhost:3000")
+                              policy.WithOrigins("https://wepost.vercel.app",
+                                                  "http://localhost:3000")
                                                   .AllowAnyHeader()
-                                                  .AllowAnyMethod();
+                                                  .AllowAnyMethod()
+                                                  .AllowCredentials();
                           });
 });
-builder.Services.AddIdentity<User, IdentityRole>(options =>
+builder.Services.AddSingleton<IDictionary<string, UserConnection>>(options => new Dictionary<string, UserConnection>());
+builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
 {
     options.SignIn.RequireConfirmedAccount = true;
     options.Lockout.AllowedForNewUsers = false;
@@ -56,7 +62,7 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
     options.Password.RequireDigit = true;
 })
             .AddEntityFrameworkStores<ProjectContext>()
-            .AddTokenProvider<DataProtectorTokenProvider<User>>(TokenOptions.DefaultProvider);
+            .AddTokenProvider<DataProtectorTokenProvider<AppUser>>(TokenOptions.DefaultProvider);
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -110,17 +116,17 @@ using (var scope = app.Services.CreateScope())
 app.UseHttpsRedirection();
 
 app.MapControllers();
-
-app.UseRouting();
-
 app.UseCors(MyAllowSpecificOrigins);
-
+app.UseRouting();
+app.UseMiddleware<WebSocketsMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
-
+app.UseCors(MyAllowSpecificOrigins);
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapGraphQL();
+
+    endpoints.MapHub<ChatHub>("/api/Chat");
 });
 
 app.UseMvc();

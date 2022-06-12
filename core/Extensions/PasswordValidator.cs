@@ -8,7 +8,7 @@ namespace core.Extensions
         Task<IdentityResult> ValidateAsync(UserManager<TUser> manager, TUser user, string password);
     }
     public class UsernameAsPasswordValidator<TUser> : IPasswordValidator<TUser>
-    where TUser : User
+    where TUser : AppUser
     {
         public Task<IdentityResult> ValidateAsync(UserManager<TUser> manager, TUser user, string password)
         {

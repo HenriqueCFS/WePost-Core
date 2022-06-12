@@ -7,8 +7,8 @@ namespace core.Data.Models
     {
         public string RequestedById { get; set; }
         public string RequestedToId { get; set; }
-        public virtual User RequestedBy { get; set; }
-        public virtual User RequestedTo { get; set; }
+        public  AppUser RequestedBy { get; set; }
+        public  AppUser RequestedTo { get; set; }
 
         public DateTime? RequestTime { get; set; }
 
@@ -19,17 +19,6 @@ namespace core.Data.Models
         [NotMapped]
         public bool Approved => FriendRequestFlag == FriendRequestFlag.Approved;
 
-        public void AddFriendRequest(User user, User friendUser)
-        {
-            var friendRequest = new Friend()
-            {
-                RequestedBy = user,
-                RequestedTo = friendUser,
-                RequestTime = DateTime.UtcNow,
-                FriendRequestFlag = FriendRequestFlag.None
-            };
-            user.SentFriendRequests.Add(friendRequest);
-        }
     }
 
     public enum FriendRequestFlag

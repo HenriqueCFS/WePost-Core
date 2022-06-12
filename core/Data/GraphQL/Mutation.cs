@@ -12,7 +12,7 @@ namespace core.Data.GraphQL
             AddUserInput input,
             [Service] ProjectContext context)
         {
-            var user = new User
+            var user = new AppUser
             {
                 UserName = input.Username,
             };
@@ -23,7 +23,7 @@ namespace core.Data.GraphQL
             return new UserPayload(user);
         }
 
-        public async Task<User> UpdateUserAsync(
+        public async Task<AppUser> UpdateUserAsync(
             UpdateUserInput input,
             [Service] ProjectContext context)
         {

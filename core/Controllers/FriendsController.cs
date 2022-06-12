@@ -28,11 +28,11 @@ namespace core.Controllers
         }
         private readonly ProjectContext _context;
 
-        private readonly UserManager<User> userManager;
+        private readonly UserManager<AppUser> userManager;
         private readonly RoleManager<IdentityRole> roleManager;
         private readonly IConfiguration _configuration;
 
-        public FriendsController(ProjectContext context, UserManager<User> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration)
+        public FriendsController(ProjectContext context, UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration)
         {
             _context = context;
             this.userManager = userManager;
@@ -49,7 +49,7 @@ namespace core.Controllers
             {
                 return NotFound();
             }
-            User currentUser = await userManager.FindByNameAsync(User.Identity.Name);
+            AppUser currentUser = await userManager.FindByNameAsync(User.Identity.Name);
             var friendList  = await _context.Friends.Where(friend => (friend.RequestedById == currentUser.Id || friend.RequestedToId == currentUser.Id) && (friend.FriendRequestFlag == FriendRequestFlag.Approved || friend.FriendRequestFlag == FriendRequestFlag.None))
                 .Select(friend => new { friend.RequestedById, friend.RequestedToId, friend.FriendRequestFlag, RequestedBy = new UserContactInfo() { Id = friend.RequestedBy.Id, UserName = friend.RequestedBy.UserName, Email = friend.RequestedBy.Email}, RequestedTo = new UserContactInfo() { Id = friend.RequestedTo.Id, UserName = friend.RequestedTo.UserName, Email = friend.RequestedTo.Email}})
                 .ToListAsync();
@@ -111,8 +111,8 @@ namespace core.Controllers
         [Authorize(Policy = "IsUser")]
         public async Task<ActionResult<Friend>> PostFriend([FromBody] AddFriendModel model)
         {
-            User reqByUser = await userManager.FindByNameAsync(User.Identity.Name);
-            User reqToUser = await userManager.FindByNameAsync(model.RequestedTo);
+            AppUser reqByUser = await userManager.FindByNameAsync(User.Identity.Name);
+            AppUser reqToUser = await userManager.FindByNameAsync(model.RequestedTo);
 
             Friend hasRequest = _context.Friends.Find(reqToUser.Id, reqByUser.Id);
 
@@ -143,8 +143,18 @@ namespace core.Controllers
             {
                 return NotFound("User not found.");
             }
-            Friend friend = new();
-            friend.AddFriendRequest(reqByUser, reqToUser);
+            Friend friend = new()
+            {
+                    RequestedBy = reqByUser,
+                    RequestedTo = reqToUser,
+                    RequestedById = reqByUser.Id,
+                    RequestedToId = reqToUser.Id,
+                    RequestTime = DateTime.UtcNow,
+                    FriendRequestFlag = FriendRequestFlag.None
+            };
+
+            reqByUser.SentFriendRequests.Add(friend);
+            reqToUser.ReceievedFriendRequests.Add(friend);
             try
             {
                 await _context.SaveChangesAsync();
@@ -160,7 +170,6 @@ namespace core.Controllers
                     throw;
                 }
             }
-
             return Ok("Friend request sent.");
         }
 

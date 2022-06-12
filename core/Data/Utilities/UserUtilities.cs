@@ -8,7 +8,7 @@ namespace core.Data.Utilities;
 
 public static class UserUtilities
 {
-    public static async Task<User?> GetSecurityCurrentUser(this ProjectContext context,
+    public static async Task<AppUser?> GetSecurityCurrentUser(this ProjectContext context,
         IHttpContextAccessor contextAccessor)
     {
         var email = contextAccessor.HttpContext?.User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value;
@@ -17,7 +17,7 @@ public static class UserUtilities
         return user ?? null;
     }
 
-    public static async Task<User?> GetSecurityUser(this ProjectContext context, string? email)
+    public static async Task<AppUser?> GetSecurityUser(this ProjectContext context, string? email)
     {
         if (email == null) return null;
         var user = await context.Users

@@ -3,11 +3,11 @@ namespace core.Data.GraphQL
 {
     public class UserPayload
     {
-        public UserPayload(User user)
+        public UserPayload(AppUser user)
         {
             User = user;
         }
 
-        public User User { get; }
+        public AppUser User { get; }
     }
 }

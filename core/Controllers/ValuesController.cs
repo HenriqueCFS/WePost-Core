@@ -21,9 +21,9 @@ namespace core.Controllers
             string Name { get; set; }
         }
         
-        private readonly UserManager<User> userManager;
+        private readonly UserManager<AppUser> userManager;
 
-        public UsersController(UserManager<User> userManager)
+        public UsersController(UserManager<AppUser> userManager)
         {
             this.userManager = userManager;  
         }
@@ -34,7 +34,7 @@ namespace core.Controllers
         [Route("explore")]
         public async Task<IActionResult> GetAllUsers()
         {
-            IList<User> allUsers = await userManager.GetUsersInRoleAsync("User");
+            IList<AppUser> allUsers = await userManager.GetUsersInRoleAsync("User");
             var treatedUsers = allUsers.Select(User => new { User.Id, User.UserName,  User.Name });
             return Ok(treatedUsers);
 
@@ -47,7 +47,7 @@ namespace core.Controllers
         [Route("me")]
         public async Task<IActionResult> GetCurrentUser()
         {
-           User currentUser = await userManager.FindByNameAsync(User.Identity.Name);
+            AppUser currentUser = await userManager.FindByNameAsync(User.Identity.Name);
            return Ok(currentUser);
         }
          
